@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "City": {
+      "title": "City",
+      "description": "The state of a player's city.",
+      "type": "object",
+      "properties": {
+        "grid": {
+          "type": "array",
+          "items": {
+            "$ref": "Tile"
+          },
+          "description": "The flattened grid of tiles."
+        },
+        "stats": {
+          "$ref": "Stats",
+          "description": "City statistics like money and population."
+        },
+        "currentGoal": {
+          "$ref": "Goal",
+          "description": "The current AI-generated goal for the city."
+        },
+        "newsFeed": {
+          "type": "array",
+          "items": {
+            "$ref": "NewsItem"
+          },
+          "description": "The recent news items for the city."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The last time the city state was updated."
+        }
+      },
+      "required": ["grid", "stats", "newsFeed", "updatedAt"]
+    },
+    "Tile": {
+      "title": "Tile",
+      "description": "A single tile on the city grid.",
+      "type": "object",
+      "properties": {
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "buildingType": { "type": "string" },
+        "variant": { "type": "integer" },
+        "constructionProgress": { "type": "integer" },
+        "condition": { "type": "integer" }
+      },
+      "required": ["x", "y", "buildingType"]
+    },
+    "Stats": {
+      "title": "Stats",
+      "description": "City statistics.",
+      "type": "object",
+      "properties": {
+        "money": { "type": "number" },
+        "population": { "type": "number" },
+        "day": { "type": "integer" }
+      },
+      "required": ["money", "population", "day"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "An AI-generated goal.",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "targetType": { "type": "string" },
+        "targetValue": { "type": "number" },
+        "buildingType": { "type": "string" },
+        "reward": { "type": "number" },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["description", "targetType", "targetValue", "reward", "completed"]
+    },
+    "NewsItem": {
+      "title": "NewsItem",
+      "description": "A news event item.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "text", "type"]
+    }
+  },
+  "firestore": {
+    "/cities/{userId}": {
+      "schema": "City",
+      "description": "Each user's city state is stored in a document named after their UID."
+    }
+  }
+}

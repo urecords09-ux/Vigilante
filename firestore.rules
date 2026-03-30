@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: cities
+    // Document ID: userId (Firebase Auth UID)
+    // Fields:
+    //   - grid: list (required) - 2D array of TileData objects
+    //   - stats: map (required) - CityStats object {money, population, day}
+    //   - currentGoal: map (optional) - AIGoal object
+    //   - newsFeed: list (required) - Array of NewsItem objects
+    //   - updatedAt: number (required) - Timestamp of last save
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidCityData(data) {
+      return data.keys().hasAll(['grid', 'stats', 'newsFeed', 'updatedAt']) &&
+             data.grid is list &&
+             data.stats is map &&
+             data.stats.keys().hasAll(['money', 'population', 'day']) &&
+             data.stats.money is number &&
+             data.stats.population is number &&
+             data.stats.day is number &&
+             data.newsFeed is list &&
+             data.updatedAt is number;
+    }
+
+    match /cities/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidCityData(request.resource.data);
+      allow update: if isOwner(userId) && isValidCityData(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
